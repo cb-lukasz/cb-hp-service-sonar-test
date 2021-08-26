@@ -172,7 +172,6 @@ task jacocoIntegrationReport(type: JacocoReport) {
             enabled true
         }
     }
-
 }
 
 task integrationTest(type: Test, group: 'verification') {
