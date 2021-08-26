@@ -31,7 +31,6 @@ springBoot {
 group = 'com.example'
 version = build_version
 sourceCompatibility = '1.8'
-sonarProject = System.getenv("SONAR_PROJECT")
 
 apply plugin: "application"
 repositories {
@@ -49,7 +48,7 @@ ext["groovy.version"] = "3.0.3"
 sonarqube {
     properties {
         //property "sonar.projectKey", "cb-lukasz_cb-hp-service-sonar-test"
-        property "sonar.projectKey", sonarProject
+        property "sonar.projectKey", System.env.SONAR_PROJECT
         property "sonar.organization", "cb-lukasz"
         property "sonar.host.url", "https://sonarcloud.io"
         //property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationTest.exec"
