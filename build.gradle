@@ -50,7 +50,7 @@ sonarqube {
         property "sonar.organization", "cb-lukasz-hp-service-sonar-test"
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationTest.exec"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/jacoco/test.xml,${project.buildDir}/jacoco/integrationTest.xml"
+        property "sonar.jacoco.xmlReportPaths", "${project.buildDir}/jacoco/test.xml,${project.buildDir}/jacoco/integrationTest.xml"
     }
 }
 
