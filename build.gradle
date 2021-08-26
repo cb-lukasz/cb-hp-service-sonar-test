@@ -31,7 +31,7 @@ springBoot {
 group = 'com.example'
 version = build_version
 sourceCompatibility = '1.8'
-sonarProject = System.getenv("SONAR_PROJECT").
+sonarProject = System.getenv("SONAR_PROJECT")
 
 apply plugin: "application"
 repositories {
