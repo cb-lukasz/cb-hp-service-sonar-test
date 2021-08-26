@@ -1,4 +1,4 @@
-name: Sonarqube
+name: Sonarqube-integration
 on:
   push:
     branches:
