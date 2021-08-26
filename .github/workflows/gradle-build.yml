@@ -29,4 +29,4 @@ jobs:
     - name: Build with Gradle
       run: |
         chmod +x gradlew
-        ./gradlew clean build --info -Partifactory_build_url=$ARTIFACTORY_BUILD_URL
+        ./gradlew clean build --info
