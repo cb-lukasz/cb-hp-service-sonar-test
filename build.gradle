@@ -53,7 +53,6 @@ sonarqube {
         property "sonar.host.url", "https://sonarcloud.io"
         //property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationTest.exec"
         //property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/jacoco/test.xml,${project.buildDir}/jacoco/integrationTest.xml"
-        //property "sonar.junit.reportsPath", "${project.buildDir}/test-results/*/TEST-*.xml"
     }
 }
 
