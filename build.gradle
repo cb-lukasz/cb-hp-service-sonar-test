@@ -48,7 +48,8 @@ ext["groovy.version"] = "3.0.3"
 sonarqube {
     properties {
         //property "sonar.projectKey", "cb-lukasz_cb-hp-service-sonar-test"
-        property "sonar.projectKey", System.env.SONAR_PROJECT
+        property "sonar.projectKey", System.env.SONAR_PROJECT_KEY
+        property "sonar.projectName", System.env.SONAR_PROJECT_NAME
         property "sonar.organization", "cb-lukasz"
         property "sonar.host.url", "https://sonarcloud.io"
         //property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec,${project.buildDir}/jacoco/integrationTest.exec"
