@@ -201,7 +201,7 @@ test {
 
 jacocoTestReport {
     dependsOn test
-    finalizedBy integrationTest
+    //finalizedBy integrationTest
     executionData(file("${project.buildDir}/jacoco/test.exec"))
     reports {
         xml {
