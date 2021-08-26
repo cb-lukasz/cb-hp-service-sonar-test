@@ -1,0 +1,23 @@
+server:
+  port : 8091
+spring:
+  jackson:
+    default-property-inclusion: NON_EMPTY
+  main:
+    log-startup-info: false
+    banner-mode: OFF
+    allow-bean-definition-overriding: true
+  profiles:
+    active: local
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    redis:
+      enabled: false
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO

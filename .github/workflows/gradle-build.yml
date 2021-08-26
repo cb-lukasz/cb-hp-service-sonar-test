@@ -1,0 +1,48 @@
+name: Build with Gradle
+
+on:
+  - workflow_dispatch
+  - push
+  - pull_request
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    if: "! contains(github.event.head_commit.message, '[ci skip]')"
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v2
+      with:
+        java-version: 8.0.202+8
+        distribution: 'adopt'
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+    - uses: aws-actions/configure-aws-credentials@v1
+      name: Configure AWS Credentials for CodeArtifact
+      with:
+        aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.CI_AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+    - name: Setup Artifactory Endpoints
+      run: |
+        # TODO: Conditionally set this
+        echo "ARTIFACTORY_BUILD_URL=$ARTIFACTORY_BUILD_URL_DEV" >> $GITHUB_ENV
+      env:
+        ARTIFACTORY_BUILD_URL_DEV: https://cb-artifactory-606027973764.d.codeartifact.us-east-1.amazonaws.com/maven/cb-build-dev/
+        ARTIFACTORY_BUILD_URL_PROD: https://cb-artifactory-606027973764.d.codeartifact.us-east-1.amazonaws.com/maven/cb-build-prod/
+    - name: Build with Gradle
+      run: |
+        export AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
+        export CODEARTIFACT_USER=aws
+        export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain cb-artifactory --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text)
+        chmod +x gradlew
+        ./gradlew clean build --info -Partifactory_build_url=$ARTIFACTORY_BUILD_URL

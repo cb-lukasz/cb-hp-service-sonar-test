@@ -1,0 +1,56 @@
+version: 0.2
+# Env Variables
+# AWS_DEFAULT_REGION
+# SETUP_TYPE
+# REGION
+# REGION_ID
+# IMAGE_REPO_NAME
+# TECH_STACK_BASE_IMAGE
+# AWS_ACCOUNT_ID
+# ARTEFACT_STORAGE_S3_BUCKET
+# CODE_ARTIFACTORY_BUILD_URL
+# CODE_ARTEFACT_DOMAIN_OWNER=606027973764
+# CODE_ARTEFACT_REGION=us-east-1
+# $CB_BUILDS_ACCOUNT_ID
+# $CB_BUILDS_ACCOUNT_REGION
+# CB_BUILDS_IAM_ROLE_ARN
+phases:
+  install:
+    runtime-versions:
+      java: corretto8
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR....
+      - aws ecr get-login-password --region $CB_BUILDS_ACCOUNT_REGION | docker login --username AWS --password-stdin $CB_BUILDS_ACCOUNT_ID.dkr.ecr.$CB_BUILDS_ACCOUNT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo "Build started on `date` for $CODEBUILD_RESOLVED_SOURCE_VERSION"
+      - ARTIFACTORY_BUILD_URL='https://cb-artifactory-606027973764.d.codeartifact.us-east-1.amazonaws.com/maven/cb-build-dev/'
+      - export CODEARTIFACT_USER='aws'
+      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --region $CODE_ARTEFACT_REGION --domain cb-artifactory --domain-owner $CODE_ARTEFACT_DOMAIN_OWNER --query authorizationToken --output text`
+      - ./gradlew clean build -Penv=$SETUP_TYPE -Partifactory_build_url=$CODE_ARTIFACTORY_BUILD_URL
+      - ls -all
+      - ARTEFACT_VERSION=`./gradlew properties -q -Penv=$SETUP_TYPE | grep "build_version" | awk '{print $2}'`
+        #- IMAGE_TAG="hpv4_${ARTEFACT_VERSION}"
+      - IMAGE_TAG="${SETUP_TYPE}__${REGION_ID}__cb-hpv4__${ARTEFACT_VERSION}"
+      - sh $CODEBUILD_SRC_DIR/scripts/build_scripts/build.sh
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG --build-arg BASE_IMAGE=$TECH_STACK_BASE_IMAGE --build-arg ARTEFACT_VERSION=$ARTEFACT_VERSION  --build-arg SETUP_TYPE=$SETUP_TYPE  --build-arg REGION=$REGION  --build-arg REGION_ID=$REGION_ID --build-arg ENVIRONMENT_NAME=$ENVIRONMENT_NAME --build-arg ENVIRONMENT_DOMAIN=$ENVIRONMENT_DOMAIN  .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $CB_BUILDS_ACCOUNT_ID.dkr.ecr.$CB_BUILDS_ACCOUNT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $CB_BUILDS_ACCOUNT_ID.dkr.ecr.$CB_BUILDS_ACCOUNT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Create image json file......
+      - echo "[{\"name\":\"$CONTAINER_NAME\",\"imageUri\":\"$BUILD_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG\"}]" > imagedefinitions.json
+      - zip build_artefacts.zip imagedefinitions.json
+      - echo "Adding builds IAM role as profile"
+      - mkdir -p ~/.aws
+      - echo -e "[builds-role]\nrole_arn=${CB_BUILDS_IAM_ROLE_ARN}\ncredential_source = EcsContainer" > ~/.aws/credentials
+      - aws s3 cp --profile builds-role build_artefacts.zip s3://$ARTEFACT_STORAGE_S3_BUCKET/$SETUP_TYPE/cb-hpv4/$REGION_ID/$ARTEFACT_VERSION/build_artefacts.zip
+# email notification pending !!!!
+artifacts:
+  files:
+    - imagedefinitions.json
+  discard-paths: yes
+

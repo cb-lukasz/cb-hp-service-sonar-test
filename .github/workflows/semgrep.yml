@@ -1,0 +1,16 @@
+name: Semgrep
+
+on:
+  - workflow_dispatch
+  - pull_request
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Semgrep
+        id: semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/java

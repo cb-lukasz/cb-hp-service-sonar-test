@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property resource="application.yaml"/>
+    <property resource="META-INF/build-info.properties"/>
+    <springProperty scope="context" name="filePath" source="logging.file.path"/>
+    <springProperty scope="context" name="fileName" source="logging.file.name"/>
+    <springProfile name="local">
+        <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    </springProfile>
+    <springProfile name="predev|dev|staging|prod">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <version>${build.version}</version>
+                <timeZone>${logging.time-zone}</timeZone>
+                <timestampPattern>${logging.time-stamp-pattern}</timestampPattern>
+            </encoder>
+        </appender>
+        <appender name="file"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${filePath}/${fileName}.log</file>
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${filePath}/${build.version}/${fileName}.%d{yyyy-MM-dd}.%i
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <version>${build.version}</version>
+                <timeZone>${logging.time-zone}</timeZone>
+                <timestampPattern>${logging.time-stamp-pattern}</timestampPattern>
+            </encoder>
+        </appender>
+        <root level="info">
+            <appender-ref ref="file"/>
+            <appender-ref ref="console"/>
+        </root>
+    </springProfile>
+</configuration>

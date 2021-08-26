@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <Match>
+        <Package name="com.chargebee.checkout.client.cb"/>
+    </Match>
+    <Match>
+        <Package name="com.chargebee.checkout.client.ms"/>
+    </Match>
+    <Match>
+        <Package name="com.chargebee.checkout.api.model"/>
+    </Match>
+    <Match>
+        <Class name="com.chargebee.checkout.api.ApiUtil"/>
+    </Match>
+</FindBugsFilter>
