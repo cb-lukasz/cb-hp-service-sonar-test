@@ -32,26 +32,10 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - uses: aws-actions/configure-aws-credentials@v1
-        name: Configure AWS Credentials for CodeArtifact
-        with:
-          aws-access-key-id: ${{ secrets.CI_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.CI_AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      - name: Setup Artifactory Endpoints
-        run: |
-          # TODO: Conditionally set this
-          echo "ARTIFACTORY_BUILD_URL=$ARTIFACTORY_BUILD_URL_DEV" >> $GITHUB_ENV
-        env:
-          ARTIFACTORY_BUILD_URL_DEV: https://cb-artifactory-606027973764.d.codeartifact.us-east-1.amazonaws.com/maven/cb-build-dev/
-          ARTIFACTORY_BUILD_URL_PROD: https://cb-artifactory-606027973764.d.codeartifact.us-east-1.amazonaws.com/maven/cb-build-prod/
       - name: Build and generate Sonarqube report
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          export AWS_ACCOUNT_ID=`aws sts get-caller-identity | jq -r '.Account'`
-          export CODEARTIFACT_USER=aws
-          export CODEARTIFACT_AUTH_TOKEN=$(aws codeartifact get-authorization-token --domain cb-artifactory --domain-owner $AWS_ACCOUNT_ID --query authorizationToken --output text)
           chmod +x gradlew
-          ./gradlew build sonarqube --info -Partifactory_build_url=$ARTIFACTORY_BUILD_URL
+          ./gradlew build sonarqube --info
